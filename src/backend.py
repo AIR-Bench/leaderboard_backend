@@ -105,6 +105,7 @@ def get_file_list(dir_path: str, allowed_suffixes: List[str] = None) -> List[str
 
 def get_zip_file_path(zip_file_name: str):
     zip_file_path = None
+    logger.warning(f"File list: {os.listdir(ZIP_CACHE_DIR)}")
     for root, _, files in os.walk(ZIP_CACHE_DIR):
         for file in files:
             logger.warning(f"file: {file}")
