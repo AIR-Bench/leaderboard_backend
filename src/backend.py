@@ -122,6 +122,7 @@ def pull_search_results(
     time_duration: int = 1800,
     start_commit_id: str = None
 ):
+    print("Start from commit:", start_commit_id)
     if start_commit_id is not None:
         API.snapshot_download(
             repo_id=SEARCH_RESULTS_REPO,
@@ -135,7 +136,9 @@ def pull_search_results(
     else:
         cur_file_paths = get_file_list(hf_search_results_repo_dir, allowed_suffixes=['.json'])
     
+    print("Start to pull new search results ...")
     while True:
+        os.makedirs(ZIP_CACHE_DIR, exist_ok=True)
         try:
             API.snapshot_download(
                 repo_id=RESULTS_REPO,

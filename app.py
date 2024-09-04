@@ -63,9 +63,7 @@ if __name__ == "__main__":
             lines=20,
             interactive=False,
         )
-        refresh_button = gr.Button(
-            text="Refresh log files",
-        )
+        refresh_button = gr.Button("Refresh log files")
         
         log_file_dropdown.change(
             fn=display_log_content,
