@@ -107,6 +107,7 @@ def get_zip_file_path(zip_file_name: str):
     zip_file_path = None
     for root, _, files in os.walk(ZIP_CACHE_DIR):
         for file in files:
+            print(file)
             if file == zip_file_name:
                 zip_file_path = os.path.abspath(os.path.join(root, file))
                 break
@@ -183,21 +184,15 @@ def pull_search_results(
             file_name = os.path.basename(metadata_file_path).split('.')[0]
             zip_file_name = f"{file_name}.zip"
             
-            try:
-                API.snapshot_download(
-                    repo_id=SEARCH_RESULTS_REPO,
-                    repo_type="dataset",
-                    local_dir=ZIP_CACHE_DIR,
-                    etag_timeout=30,
-                    allow_patterns=[zip_file_name]
-                )
-            except Exception as e:
-                print("----")
-                print(e)
-                print("----")
-                logger.error(f"Failed to download the zip file `{zip_file_name}`: {e}")
-                continue
+            API.snapshot_download(
+                repo_id=SEARCH_RESULTS_REPO,
+                repo_type="dataset",
+                local_dir=ZIP_CACHE_DIR,
+                etag_timeout=30,
+                allow_patterns=[zip_file_name]
+            )
             zip_file_path = get_zip_file_path(zip_file_name)
+            assert zip_file_path is not None, f"Failed to find the zip file `{zip_file_name}`"
             
             # try:
             #     API.snapshot_download(
