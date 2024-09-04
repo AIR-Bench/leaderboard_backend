@@ -6,7 +6,7 @@ import multiprocessing
 from src.backend import pull_search_results
 from src.envs import (
     API, REPO_ID, START_COMMIT_ID,
-    LOG_DIR, HF_CACHE_DIR,
+    LOG_DIR, LOG_FILE_PATH, HF_CACHE_DIR,
     HF_SEARCH_RESULTS_REPO_DIR, HF_EVAL_RESULTS_REPO_DIR,
     UNZIP_TARGET_DIR,
     TIME_DURATION,
@@ -14,6 +14,13 @@ from src.envs import (
 )
 
 logger = logging.getLogger(__name__)
+logging.basicConfig(
+    filename=LOG_FILE_PATH,
+    filemode='w',
+    level=logging.WARNING,
+    datefmt='%Y-%m-%d %H:%M:%S',
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 
 
 def restart_space():
@@ -64,6 +71,11 @@ if __name__ == "__main__":
         )
         log_content_box = gr.Textbox(
             label="Log content",
+            lines=20,
+            interactive=False,
+        )
+        log_file_list_box = gr.Textbox(
+            label="\n".join(get_log_files()),
             lines=20,
             interactive=False,
         )

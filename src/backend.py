@@ -13,15 +13,13 @@ from air_benchmark.evaluation_utils.evaluator import Evaluator
 
 from src.envs import (
     API,
-    LOG_DIR, ZIP_CACHE_DIR,
+    LOG_FILE_PATH, ZIP_CACHE_DIR,
     SEARCH_RESULTS_REPO, RESULTS_REPO
 )
 
-log_file = os.path.join(LOG_DIR, f"backend_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log")
-
 logger = logging.getLogger(__name__)
 logging.basicConfig(
-    filename=log_file,
+    filename=LOG_FILE_PATH,
     filemode='w',
     level=logging.WARNING,
     datefmt='%Y-%m-%d %H:%M:%S',
@@ -105,7 +103,6 @@ def get_file_list(dir_path: str, allowed_suffixes: List[str] = None) -> List[str
 
 def get_zip_file_path(zip_file_name: str):
     zip_file_path = None
-    # logger.warning(f"File list: {os.listdir(ZIP_CACHE_DIR)}")
     for root, _, files in os.walk(ZIP_CACHE_DIR):
         for file in files:
             if file == zip_file_name:

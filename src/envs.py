@@ -1,4 +1,5 @@
 import os
+import time
 from huggingface_hub import HfApi
 
 
@@ -22,6 +23,7 @@ HF_CACHE_DIR = os.path.join(CACHE_PATH, ".cache")
 ZIP_CACHE_DIR = os.path.join(CACHE_PATH, ".zip_cache")
 
 LOG_DIR = os.path.join(CACHE_PATH, "logs")
+LOG_FILE_PATH = os.path.join(LOG_DIR, f"backend_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log")
 
 API = HfApi(token=HF_TOKEN)
 
