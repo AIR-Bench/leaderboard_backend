@@ -139,6 +139,7 @@ def pull_search_results(
     print("Start to pull new search results ...")
     while True:
         os.makedirs(ZIP_CACHE_DIR, exist_ok=True)
+        os.makedirs(unzip_target_dir, exist_ok=True)
         try:
             API.snapshot_download(
                 repo_id=RESULTS_REPO,
