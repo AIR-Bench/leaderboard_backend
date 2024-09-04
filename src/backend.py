@@ -107,7 +107,7 @@ def get_zip_file_path(zip_file_name: str):
     zip_file_path = None
     for root, _, files in os.walk(ZIP_CACHE_DIR):
         for file in files:
-            print(file)
+            logger.warning(f"file: {file}")
             if file == zip_file_name:
                 zip_file_path = os.path.abspath(os.path.join(root, file))
                 break
@@ -197,7 +197,7 @@ def pull_search_results(
             except Exception as e:
                 logger.error(f"Failed to download the zip file `{zip_file_name}`: {e}")
                 continue
-            print(zip_file_path)    # debug
+
             unzip_target_path = os.path.join(unzip_target_dir, benchmark_version, file_name)
             os.makedirs(unzip_target_path, exist_ok=True)
             try:
