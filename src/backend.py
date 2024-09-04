@@ -105,10 +105,9 @@ def get_file_list(dir_path: str, allowed_suffixes: List[str] = None) -> List[str
 
 def get_zip_file_path(zip_file_name: str):
     zip_file_path = None
-    logger.warning(f"File list: {os.listdir(ZIP_CACHE_DIR)}")
+    # logger.warning(f"File list: {os.listdir(ZIP_CACHE_DIR)}")
     for root, _, files in os.walk(ZIP_CACHE_DIR):
         for file in files:
-            logger.warning(f"file: {file}")
             if file == zip_file_name:
                 zip_file_path = os.path.abspath(os.path.join(root, file))
                 break
@@ -191,7 +190,7 @@ def pull_search_results(
                     repo_type="dataset",
                     local_dir=ZIP_CACHE_DIR,
                     etag_timeout=30,
-                    allow_patterns=[zip_file_name]
+                    allow_patterns=[f'*{zip_file_name}']
                 )
                 zip_file_path = get_zip_file_path(zip_file_name)
                 assert zip_file_path is not None, f"zip_file_path is None"
