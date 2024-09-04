@@ -17,6 +17,8 @@ def restart_space():
 
 
 def get_log_files():
+    if not os.path.exists(LOG_DIR):
+        return []
     return sorted([f for f in os.listdir(LOG_DIR) if f.endswith('.log')])
 
 
@@ -32,6 +34,8 @@ def display_log_content(selected_file):
 
 
 if __name__ == "__main__":
+    os.makedirs(LOG_DIR, exist_ok=True)
+    
     process = multiprocessing.Process(
         target=pull_search_results,
         args=(
