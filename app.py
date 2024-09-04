@@ -1,63 +1,76 @@
+import os
 import gradio as gr
-from huggingface_hub import InferenceClient
+import multiprocessing
 
-"""
-For more information on `huggingface_hub` Inference API support, please check the docs: https://huggingface.co/docs/huggingface_hub/v0.22.2/en/guides/inference
-"""
-client = InferenceClient("HuggingFaceH4/zephyr-7b-beta")
-
-
-def respond(
-    message,
-    history: list[tuple[str, str]],
-    system_message,
-    max_tokens,
-    temperature,
-    top_p,
-):
-    messages = [{"role": "system", "content": system_message}]
-
-    for val in history:
-        if val[0]:
-            messages.append({"role": "user", "content": val[0]})
-        if val[1]:
-            messages.append({"role": "assistant", "content": val[1]})
-
-    messages.append({"role": "user", "content": message})
-
-    response = ""
-
-    for message in client.chat_completion(
-        messages,
-        max_tokens=max_tokens,
-        stream=True,
-        temperature=temperature,
-        top_p=top_p,
-    ):
-        token = message.choices[0].delta.content
-
-        response += token
-        yield response
-
-"""
-For information on how to customize the ChatInterface, peruse the gradio docs: https://www.gradio.app/docs/chatinterface
-"""
-demo = gr.ChatInterface(
-    respond,
-    additional_inputs=[
-        gr.Textbox(value="You are a friendly Chatbot.", label="System message"),
-        gr.Slider(minimum=1, maximum=2048, value=512, step=1, label="Max new tokens"),
-        gr.Slider(minimum=0.1, maximum=4.0, value=0.7, step=0.1, label="Temperature"),
-        gr.Slider(
-            minimum=0.1,
-            maximum=1.0,
-            value=0.95,
-            step=0.05,
-            label="Top-p (nucleus sampling)",
-        ),
-    ],
+from src.backend import pull_search_results
+from src.envs import (
+    API, REPO_ID, START_COMMIT_ID,
+    LOG_DIR, HF_CACHE_DIR,
+    HF_SEARCH_RESULTS_REPO_DIR, HF_EVAL_RESULTS_REPO_DIR,
+    UNZIP_TARGET_DIR,
+    TIME_DURATION,
+    EVAL_K_VALUES,
 )
+
+def restart_space():
+    API.restart_space(repo_id=REPO_ID)
+
+
+def get_log_files():
+    return sorted([f for f in os.listdir(LOG_DIR) if f.endswith('.log')])
+
+
+def refresh_log_files():
+    return get_log_files()
+
+
+def display_log_content(selected_file):
+    if selected_file:
+        with open(os.path.join(LOG_DIR, selected_file), 'r', encoding='utf-8') as file:
+            return file.read()
+    return "No log file selected"
 
 
 if __name__ == "__main__":
+    process = multiprocessing.Process(
+        target=pull_search_results,
+        args=(
+            HF_SEARCH_RESULTS_REPO_DIR,
+            HF_EVAL_RESULTS_REPO_DIR,
+            UNZIP_TARGET_DIR,
+            EVAL_K_VALUES,
+            HF_CACHE_DIR,
+            TIME_DURATION,
+            START_COMMIT_ID,
+        ),
+    )
+    process.start()
+    
+    with gr.Blocks() as demo:
+        gr.Markdown("## Select a log file to view its content")
+        
+        log_file_dropdown = gr.Dropdown(
+            choices=refresh_log_files(),
+            label="Select log file",
+            interactive=True,
+        )
+        log_content_box = gr.Textbox(
+            label="Log content",
+            lines=20,
+            interactive=False,
+        )
+        refresh_button = gr.Button(
+            text="Refresh log files",
+        )
+        
+        log_file_dropdown.change(
+            fn=display_log_content,
+            inputs=log_file_dropdown,
+            outputs=log_content_box,
+        )
+        refresh_button.click(
+            fn=refresh_log_files,
+            outputs=log_file_dropdown,
+        )
+    
     demo.launch()
