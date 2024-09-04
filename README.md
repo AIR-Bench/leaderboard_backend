@@ -1,6 +1,6 @@
 ---
 title: Leaderboard Backend
-emoji: 💬
+emoji: 🥇
 colorFrom: yellow
 colorTo: purple
 sdk: gradio
