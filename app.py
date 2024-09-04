@@ -1,4 +1,5 @@
 import os
+import logging
 import gradio as gr
 import multiprocessing
 
@@ -11,6 +12,9 @@ from src.envs import (
     TIME_DURATION,
     EVAL_K_VALUES,
 )
+
+logger = logging.getLogger(__name__)
+
 
 def restart_space():
     API.restart_space(repo_id=REPO_ID)
