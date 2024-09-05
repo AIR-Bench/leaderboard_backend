@@ -138,8 +138,8 @@ def get_submit_infos_list(file_paths: List[str], eval_results_dir: str) -> dict:
         submit_info['Rank'] = rank_time
         submit_info['Submission Date'] = metadata['timestamp']
         submit_info['Benchmark Version'] = metadata['version']
-        submit_info['Retrieval Method'] = make_clickable_model(metadata['model_name'], metadata['model_url'])
-        submit_info['Reranking Method'] = make_clickable_model(metadata['reranker_name'], metadata['reranker_url'])
+        submit_info['Retrieval Method'] = (make_clickable_model(metadata['model_name'], metadata['model_url']))
+        submit_info['Reranking Method'] = (make_clickable_model(metadata['reranker_name'], metadata['reranker_url']))
         submit_info['Revision'] = metadata['revision']
         if find_file(f"results_{file_name}.json", eval_results_dir):
             submit_info['Status'] = "✔️ Success"
