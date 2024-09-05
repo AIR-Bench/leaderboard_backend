@@ -1,5 +1,4 @@
 import os
-import time
 from huggingface_hub import HfApi
 
 
@@ -22,8 +21,7 @@ CACHE_PATH = os.getenv("HF_HOME", ".")
 HF_CACHE_DIR = os.path.join(CACHE_PATH, ".cache")
 ZIP_CACHE_DIR = os.path.join(CACHE_PATH, ".zip_cache")
 
-LOG_DIR = os.path.join(CACHE_PATH, "logs")
-LOG_FILE_PATH = os.path.join(LOG_DIR, f"backend_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log")
+SUBMIT_INFOS_SAVE_PATH = os.path.join(CACHE_PATH, "submit_infos.json")
 
 API = HfApi(token=HF_TOKEN)
 
@@ -35,3 +33,13 @@ UNZIP_TARGET_DIR = os.path.join(CACHE_PATH, "unzip_target_dir")
 TIME_DURATION = 300  # seconds
 
 EVAL_K_VALUES = [1, 3, 5, 10, 50, 100, 1000]
+
+def model_hyperlink(link, model_name):
+    return f'<a target="_blank" href="{link}" style="color: var(--link-text-color); text-decoration: underline;text-decoration-style: dotted;">{model_name}</a>'
+
+
+def make_clickable_model(model_name: str, model_link: str):
+    # link = f"https://huggingface.co/{model_name}"
+    if not model_link or not model_link.startswith("https://"):
+        return model_name
+    return model_hyperlink(model_link, model_name)

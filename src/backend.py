@@ -13,16 +13,14 @@ from air_benchmark.evaluation_utils.evaluator import Evaluator
 
 from src.envs import (
     API,
-    LOG_FILE_PATH, ZIP_CACHE_DIR,
-    SEARCH_RESULTS_REPO, RESULTS_REPO
+    ZIP_CACHE_DIR,SUBMIT_INFOS_SAVE_PATH,
+    SEARCH_RESULTS_REPO, RESULTS_REPO,
+    make_clickable_model
 )
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
-    filename=LOG_FILE_PATH,
-    filemode='w',
     level=logging.WARNING,
-    datefmt='%Y-%m-%d %H:%M:%S',
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
@@ -111,6 +109,49 @@ def get_zip_file_path(zip_file_name: str):
     return zip_file_path
 
 
+def find_file(file_name: str, dir_path: str):
+    if not os.path.exists(dir_path) or not os.path.isdir(dir_path):
+        return False
+    for root, _, files in os.walk(dir_path):
+        for file in files:
+            if file == file_name:
+                return True
+    return False
+
+
+def get_submit_infos_list(file_paths: List[str], eval_results_dir: str) -> dict:
+    submit_infos_list = []
+    for file_path in file_paths:
+        submit_info = {
+            'Rank': None,
+            'Submission Date': None,
+            'Benchmark Version': None,
+            'Retrieval Method': None,
+            'Reranking Method': None,
+            'Revision': None,
+            'Status': None,
+        }
+        file_name = os.path.basename(file_path).split('.')[0]
+        rank_time = file_name.split('-')[0]
+        with open(file_path, 'r', encoding='utf-8') as f:
+            metadata = json.load(f)
+        submit_info['Rank'] = rank_time
+        submit_info['Submission Date'] = metadata['timestamp']
+        submit_info['Benchmark Version'] = metadata['version']
+        submit_info['Retrieval Method'] = make_clickable_model(metadata['model_name'], metadata['model_url'])
+        submit_info['Reranking Method'] = make_clickable_model(metadata['reranker_name'], metadata['reranker_url'])
+        submit_info['Revision'] = metadata['revision']
+        if find_file(f"results_{file_name}.json", eval_results_dir):
+            submit_info['Status'] = "✔️ Success"
+        else:
+            submit_info['Status'] = "❌ Failed"
+        submit_infos_list.append(submit_info)
+    sorted_submit_infos_list = sorted(submit_infos_list, key=lambda x: x['Rank'], reverse=True)
+    for rank, submit_info in enumerate(sorted_submit_infos_list, 1):
+        submit_info['Rank'] = rank
+    return sorted_submit_infos_list
+
+
 def pull_search_results(
     hf_search_results_repo_dir: str,
     hf_eval_results_repo_dir: str,
@@ -132,6 +173,13 @@ def pull_search_results(
         )
         cur_file_paths = get_file_list(hf_search_results_repo_dir, allowed_suffixes=['.json'])
     else:
+        API.snapshot_download(
+            repo_id=SEARCH_RESULTS_REPO,
+            repo_type="dataset",
+            local_dir=hf_search_results_repo_dir,
+            etag_timeout=30,
+            allow_patterns=['*.json']
+        )
         cur_file_paths = get_file_list(hf_search_results_repo_dir, allowed_suffixes=['.json'])
     
     print("Start to pull new search results ...")
@@ -280,7 +328,13 @@ def pull_search_results(
         shutil.rmtree(ZIP_CACHE_DIR)
         shutil.rmtree(unzip_target_dir)
         
+        # update submit infos
+        cur_file_paths = new_file_paths
+        submit_infos_list = get_submit_infos_list(cur_file_paths, hf_eval_results_repo_dir)
+        with open(SUBMIT_INFOS_SAVE_PATH, 'w', encoding='utf-8') as f:
+            json.dump(submit_infos_list, f, ensure_ascii=False, indent=4)
+        
         # Wait for the next update
         logger.warning(f"Wait for {time_duration} seconds for the next update ...")
-        cur_file_paths = new_file_paths
+        
         time.sleep(time_duration)

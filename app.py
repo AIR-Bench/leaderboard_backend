@@ -1,52 +1,60 @@
 import os
+import json
 import logging
+import pandas as pd
 import gradio as gr
 import multiprocessing
 
 from src.backend import pull_search_results
 from src.envs import (
     API, REPO_ID, START_COMMIT_ID,
-    LOG_DIR, LOG_FILE_PATH, HF_CACHE_DIR,
+    HF_CACHE_DIR, SUBMIT_INFOS_SAVE_PATH,
     HF_SEARCH_RESULTS_REPO_DIR, HF_EVAL_RESULTS_REPO_DIR,
     UNZIP_TARGET_DIR,
     TIME_DURATION,
     EVAL_K_VALUES,
 )
+from src.css_html_js import custom_css
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
-    filename=LOG_FILE_PATH,
-    filemode='w',
     level=logging.WARNING,
-    datefmt='%Y-%m-%d %H:%M:%S',
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
 
-def restart_space():
-    API.restart_space(repo_id=REPO_ID)
+# def restart_space():
+#     API.restart_space(repo_id=REPO_ID)
 
 
-def get_log_files():
-    if not os.path.exists(LOG_DIR):
-        return []
-    return sorted([f for f in os.listdir(LOG_DIR) if f.endswith('.log')])
+def load_submit_infos_df():
+    if os.path.exists(SUBMIT_INFOS_SAVE_PATH):
+        with open(SUBMIT_INFOS_SAVE_PATH, 'r', encoding='utf-8') as f:
+            submit_infos = json.load(f)
+    else:
+        submit_infos = []
+    submit_infos_df = pd.DataFrame(submit_infos)
+    return submit_infos_df
 
 
-def refresh_log_files():
-    return get_log_files()
+with gr.Blocks(css=custom_css) as demo:
+        gr.Markdown("## Submission Infos Table")
+        
+        table = gr.Dataframe(
+            value=load_submit_infos_df(),
+            label="Submission Infos",
+            interactive=False,
+        )
+        
+        refresh_button = gr.Button("Refresh Submission Infos")
 
-
-def display_log_content(selected_file):
-    if selected_file:
-        with open(os.path.join(LOG_DIR, selected_file), 'r', encoding='utf-8') as file:
-            return file.read()
-    return "No log file selected"
+        refresh_button.click(
+            fn=load_submit_infos_df,
+            outputs=table,
+        )
 
 
 if __name__ == "__main__":
-    os.makedirs(LOG_DIR, exist_ok=True)
-    
     process = multiprocessing.Process(
         target=pull_search_results,
         args=(
@@ -60,35 +68,4 @@ if __name__ == "__main__":
         ),
     )
     process.start()
-    
-    with gr.Blocks() as demo:
-        gr.Markdown("## Select a log file to view its content")
-        
-        log_file_dropdown = gr.Dropdown(
-            choices=refresh_log_files(),
-            label="Select log file",
-            interactive=True,
-        )
-        log_content_box = gr.Textbox(
-            label="Log content",
-            lines=20,
-            interactive=False,
-        )
-        log_file_list_box = gr.Textbox(
-            label="\n".join(get_log_files()),
-            lines=20,
-            interactive=False,
-        )
-        refresh_button = gr.Button("Refresh log files")
-        
-        log_file_dropdown.change(
-            fn=display_log_content,
-            inputs=log_file_dropdown,
-            outputs=log_content_box,
-        )
-        refresh_button.click(
-            fn=refresh_log_files,
-            outputs=log_file_dropdown,
-        )
-    
     demo.launch()
