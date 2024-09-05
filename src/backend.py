@@ -123,7 +123,7 @@ def get_submit_infos_list(file_paths: List[str], eval_results_dir: str) -> dict:
     submit_infos_list = []
     for file_path in file_paths:
         submit_info = {
-            'Rank': None,
+            'Descending Order': None,
             'Submission Date': None,
             'Benchmark Version': None,
             'Retrieval Method': None,
@@ -135,7 +135,7 @@ def get_submit_infos_list(file_paths: List[str], eval_results_dir: str) -> dict:
         rank_time = file_name.split('-')[0]
         with open(file_path, 'r', encoding='utf-8') as f:
             metadata = json.load(f)
-        submit_info['Rank'] = rank_time
+        submit_info['Descending Order'] = rank_time
         submit_info['Submission Date'] = metadata['timestamp']
         submit_info['Benchmark Version'] = metadata['version']
         submit_info['Retrieval Method'] = (make_clickable_model(metadata['model_name'], metadata['model_url']))
@@ -146,9 +146,9 @@ def get_submit_infos_list(file_paths: List[str], eval_results_dir: str) -> dict:
         else:
             submit_info['Status'] = "❌ Failed"
         submit_infos_list.append(submit_info)
-    sorted_submit_infos_list = sorted(submit_infos_list, key=lambda x: x['Rank'], reverse=True)
-    for rank, submit_info in enumerate(sorted_submit_infos_list, 1):
-        submit_info['Rank'] = rank
+    sorted_submit_infos_list = sorted(submit_infos_list, key=lambda x: x['Descending Order'], reverse=True)
+    for order, submit_info in enumerate(sorted_submit_infos_list, 1):
+        submit_info['Descending Order'] = order
     return sorted_submit_infos_list
 
 
