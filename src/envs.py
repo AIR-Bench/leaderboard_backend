@@ -43,3 +43,5 @@ def make_clickable_model(model_name: str, model_link: str):
     if not model_link or not model_link.startswith("https://"):
         return model_name
     return model_hyperlink(model_link, model_name)
+
+SUBMIT_INFOS_TABLE_COLS = ['Rank', 'Status', 'Retrieval Method', 'Reranking Method', 'Submission Date', 'Revision']

@@ -13,6 +13,7 @@ from src.envs import (
     UNZIP_TARGET_DIR,
     TIME_DURATION,
     EVAL_K_VALUES,
+    SUBMIT_INFOS_TABLE_COLS
 )
 from src.css_html_js import custom_css
 
@@ -33,16 +34,19 @@ def load_submit_infos_df():
             submit_infos = json.load(f)
     else:
         submit_infos = []
-    submit_infos_df = pd.DataFrame(submit_infos)
+    if submit_infos:
+        submit_infos_df = pd.DataFrame(submit_infos)[SUBMIT_INFOS_TABLE_COLS]
+    else:
+        submit_infos_df = pd.DataFrame(columns=SUBMIT_INFOS_TABLE_COLS)
     return submit_infos_df
 
 
 with gr.Blocks(css=custom_css) as demo:
         gr.Markdown("## Submission Infos Table")
         
-        table = gr.Dataframe(
+        table = gr.components.Dataframe(
             value=load_submit_infos_df(),
-            label="Submission Infos",
+            elem_id="submission-infos-table",
             interactive=False,
         )
         
