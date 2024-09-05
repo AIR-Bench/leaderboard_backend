@@ -38,16 +38,15 @@ def load_submit_infos_df():
         submit_infos_df = pd.DataFrame(submit_infos)[SUBMIT_INFOS_TABLE_COLS]
     else:
         submit_infos_df = pd.DataFrame(columns=SUBMIT_INFOS_TABLE_COLS)
-    return submit_infos_df
+    return submit_infos_df.to_html(escape=False, index=False)
 
 
 with gr.Blocks(css=custom_css) as demo:
         gr.Markdown("## Submission Infos Table")
         
-        table = gr.components.Dataframe(
+        table = gr.HTML(
             value=load_submit_infos_df(),
             elem_id="submission-infos-table",
-            interactive=False,
         )
         
         refresh_button = gr.Button("Refresh Submission Infos")
