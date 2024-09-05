@@ -42,20 +42,20 @@ def load_submit_infos_df():
 
 
 with gr.Blocks(css=custom_css) as demo:
-        gr.Markdown("## Submission Infos Table")
+    gr.Markdown("## Submission Infos Table")
         
-        table = gr.components.Dataframe(
-            value=load_submit_infos_df(),
-            elem_id="submission-infos-table",
-            interactive=False,
-        )
+    table = gr.components.Dataframe(
+        value=load_submit_infos_df(),
+        elem_id="submission-infos-table",
+        interactive=False,
+    )
         
-        refresh_button = gr.Button("Refresh Submission Infos")
+    refresh_button = gr.Button("Refresh Submission Infos")
 
-        refresh_button.click(
-            fn=load_submit_infos_df,
-            outputs=table,
-        )
+    refresh_button.click(
+        fn=load_submit_infos_df,
+        outputs=table,
+    )
 
 
 if __name__ == "__main__":
