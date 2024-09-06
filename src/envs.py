@@ -47,4 +47,4 @@ def make_clickable_model(model_name: str, model_link: str):
         return model_name
     return model_hyperlink(model_link, model_name)
 
-SUBMIT_INFOS_TABLE_COLS = ['#', 'Status', 'Retrieval Method', 'Reranking Method', 'Submission Date', 'Revision']
+SUBMIT_INFOS_TABLE_COLS = ['ID', 'Status', 'Retrieval Method', 'Reranking Method', 'Submission Date', 'Revision']
