@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(
     level=logging.WARNING,
     datefmt='%Y-%m-%d %H:%M:%S',
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format='%(asctime)s | %(name)s | %(levelname)s: %(message)s',
     force=True
 )
 
@@ -342,20 +342,21 @@ def pull_search_results(
         shutil.rmtree(unzip_target_dir)
         
         # update submit infos
-        cur_file_paths = new_file_paths
-        submit_infos_list = get_submit_infos_list(cur_file_paths, hf_eval_results_repo_dir)
-        submit_infos_save_path = os.path.join(submit_infos_dir, submit_infos_file_name)
-        with open(submit_infos_save_path, 'w', encoding='utf-8') as f:
-            json.dump(submit_infos_list, f, ensure_ascii=False, indent=4)
-        
-        # Commit the updated submit infos
-        API.upload_folder(
-            repo_id=SUBMIT_INFOS_REPO,
-            folder_path=submit_infos_dir,
-            path_in_repo=None,
-            commit_message="Update submission infos",
-            repo_type="dataset"
-        )
+        if new_file_paths != cur_file_paths:
+            cur_file_paths = new_file_paths
+            submit_infos_list = get_submit_infos_list(cur_file_paths, hf_eval_results_repo_dir)
+            submit_infos_save_path = os.path.join(submit_infos_dir, submit_infos_file_name)
+            with open(submit_infos_save_path, 'w', encoding='utf-8') as f:
+                json.dump(submit_infos_list, f, ensure_ascii=False, indent=4)
+            
+            # Commit the updated submit infos
+            API.upload_folder(
+                repo_id=SUBMIT_INFOS_REPO,
+                folder_path=submit_infos_dir,
+                path_in_repo=None,
+                commit_message="Update submission infos",
+                repo_type="dataset"
+            )
         
         # Wait for the next update
         logger.warning(f"Wait for {time_duration} seconds for the next update ...")
