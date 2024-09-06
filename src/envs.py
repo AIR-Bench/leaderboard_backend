@@ -15,13 +15,16 @@ REPO_ID = f"{OWNER}/leaderboard_backend"
 RESULTS_REPO = f"{OWNER}/eval_results"
 # repo for submitting the evaluation
 SEARCH_RESULTS_REPO = f"{OWNER}/search_results"
+# repo for storing the submission infos
+SUBMIT_INFOS_REPO = f"{OWNER}/submit_infos"
 
 # If you setup a cache later, just change HF_HOME
 CACHE_PATH = os.getenv("HF_HOME", ".")
 HF_CACHE_DIR = os.path.join(CACHE_PATH, ".cache")
 ZIP_CACHE_DIR = os.path.join(CACHE_PATH, ".zip_cache")
 
-SUBMIT_INFOS_SAVE_PATH = os.path.join(CACHE_PATH, "submit_infos.json")
+SUBMIT_INFOS_DIR = os.path.join(CACHE_PATH, "submit_infos")
+SUBMIT_INFOS_FILE_NAME = "submit_infos.json"
 
 API = HfApi(token=HF_TOKEN)
 

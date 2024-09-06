@@ -7,9 +7,9 @@ import multiprocessing
 
 from src.backend import pull_search_results
 from src.envs import (
-    API, REPO_ID, START_COMMIT_ID,
-    HF_CACHE_DIR, SUBMIT_INFOS_SAVE_PATH,
-    HF_SEARCH_RESULTS_REPO_DIR, HF_EVAL_RESULTS_REPO_DIR,
+    API, START_COMMIT_ID,
+    HF_CACHE_DIR, SUBMIT_INFOS_DIR, SUBMIT_INFOS_FILE_NAME,
+    HF_SEARCH_RESULTS_REPO_DIR, HF_EVAL_RESULTS_REPO_DIR, SUBMIT_INFOS_REPO,
     UNZIP_TARGET_DIR,
     TIME_DURATION,
     EVAL_K_VALUES,
@@ -20,7 +20,9 @@ from src.css_html_js import custom_css
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     level=logging.WARNING,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    datefmt='%Y-%m-%d %H:%M:%S',
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    force=True
 )
 
 
@@ -29,8 +31,17 @@ logging.basicConfig(
 
 
 def load_submit_infos_df():
-    if os.path.exists(SUBMIT_INFOS_SAVE_PATH):
-        with open(SUBMIT_INFOS_SAVE_PATH, 'r', encoding='utf-8') as f:
+    # Pull the submit infos
+    API.snapshot_download(
+        repo_id=SUBMIT_INFOS_REPO,
+        repo_type="dataset",
+        local_dir=SUBMIT_INFOS_DIR,
+        etag_timeout=30
+    )
+    submit_infos_save_path = os.path.join(SUBMIT_INFOS_DIR, SUBMIT_INFOS_FILE_NAME)
+    
+    if os.path.exists(submit_infos_save_path):
+        with open(submit_infos_save_path, 'r', encoding='utf-8') as f:
             submit_infos = json.load(f)
     else:
         submit_infos = []
@@ -65,6 +76,8 @@ if __name__ == "__main__":
             HF_SEARCH_RESULTS_REPO_DIR,
             HF_EVAL_RESULTS_REPO_DIR,
             UNZIP_TARGET_DIR,
+            SUBMIT_INFOS_DIR,
+            SUBMIT_INFOS_FILE_NAME,
             EVAL_K_VALUES,
             HF_CACHE_DIR,
             TIME_DURATION,

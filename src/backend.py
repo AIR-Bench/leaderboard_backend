@@ -13,15 +13,17 @@ from air_benchmark.evaluation_utils.evaluator import Evaluator
 
 from src.envs import (
     API,
-    ZIP_CACHE_DIR,SUBMIT_INFOS_SAVE_PATH,
-    SEARCH_RESULTS_REPO, RESULTS_REPO,
+    ZIP_CACHE_DIR,
+    SEARCH_RESULTS_REPO, RESULTS_REPO, SUBMIT_INFOS_REPO,
     make_clickable_model
 )
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     level=logging.WARNING,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    datefmt='%Y-%m-%d %H:%M:%S',
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    force=True
 )
 
 
@@ -156,12 +158,22 @@ def pull_search_results(
     hf_search_results_repo_dir: str,
     hf_eval_results_repo_dir: str,
     unzip_target_dir: str,
+    submit_infos_dir: str,
+    submit_infos_file_name: str = "submit_infos.json",
     k_values: List[int] = [1, 3, 5, 10, 50, 100, 1000],
     cache_dir: str = None,
     time_duration: int = 1800,
     start_commit_id: str = None
 ):
-    print("Start from commit:", start_commit_id)
+    # Pull the submit infos
+    API.snapshot_download(
+        repo_id=SUBMIT_INFOS_REPO,
+        repo_type="dataset",
+        local_dir=submit_infos_dir,
+        etag_timeout=30
+    )
+    
+    logger.warning(f"Start from commit: {start_commit_id}")
     if start_commit_id is not None:
         API.snapshot_download(
             repo_id=SEARCH_RESULTS_REPO,
@@ -182,7 +194,7 @@ def pull_search_results(
         )
         cur_file_paths = get_file_list(hf_search_results_repo_dir, allowed_suffixes=['.json'])
     
-    print("Start to pull new search results ...")
+    logger.warning("Start to pull new search results ...")
     while True:
         os.makedirs(ZIP_CACHE_DIR, exist_ok=True)
         os.makedirs(unzip_target_dir, exist_ok=True)
@@ -331,8 +343,18 @@ def pull_search_results(
         # update submit infos
         cur_file_paths = new_file_paths
         submit_infos_list = get_submit_infos_list(cur_file_paths, hf_eval_results_repo_dir)
-        with open(SUBMIT_INFOS_SAVE_PATH, 'w', encoding='utf-8') as f:
+        submit_infos_save_path = os.path.join(submit_infos_dir, submit_infos_file_name)
+        with open(submit_infos_save_path, 'w', encoding='utf-8') as f:
             json.dump(submit_infos_list, f, ensure_ascii=False, indent=4)
+        
+        # Commit the updated submit infos
+        API.upload_folder(
+            repo_id=SUBMIT_INFOS_REPO,
+            folder_path=submit_infos_dir,
+            path_in_repo=None,
+            commit_message="Update submission infos",
+            repo_type="dataset"
+        )
         
         # Wait for the next update
         logger.warning(f"Wait for {time_duration} seconds for the next update ...")
