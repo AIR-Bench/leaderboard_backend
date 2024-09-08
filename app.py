@@ -59,6 +59,7 @@ with gr.Blocks(css=custom_css) as demo:
         value=load_submit_infos_df(),
         elem_id="submission-infos-table",
         interactive=False,
+        datatype="markdown"
     )
         
     refresh_button = gr.Button("Refresh Submission Infos")
