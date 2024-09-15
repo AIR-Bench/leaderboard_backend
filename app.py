@@ -4,10 +4,11 @@ import logging
 import pandas as pd
 import gradio as gr
 import multiprocessing
+from apscheduler.schedulers.background import BackgroundScheduler
 
 from src.backend import pull_search_results
 from src.envs import (
-    API, START_COMMIT_ID,
+    API, START_COMMIT_ID, REPO_ID,
     HF_CACHE_DIR, SUBMIT_INFOS_DIR, SUBMIT_INFOS_FILE_NAME,
     HF_SEARCH_RESULTS_REPO_DIR, HF_EVAL_RESULTS_REPO_DIR, SUBMIT_INFOS_REPO,
     UNZIP_TARGET_DIR,
@@ -26,8 +27,8 @@ logging.basicConfig(
 )
 
 
-# def restart_space():
-#     API.restart_space(repo_id=REPO_ID)
+def restart_space():
+    API.restart_space(repo_id=REPO_ID)
 
 
 def load_submit_infos_df():
@@ -86,4 +87,9 @@ if __name__ == "__main__":
         ),
     )
     process.start()
+    
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(restart_space, "interval", seconds=1800)
+    scheduler.start()
+    demo.queue(default_concurrency_limit=40)
     demo.launch()
