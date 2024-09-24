@@ -33,7 +33,7 @@ HF_EVAL_RESULTS_REPO_DIR = os.path.join(CACHE_PATH, "eval_results")
 
 UNZIP_TARGET_DIR = os.path.join(CACHE_PATH, "unzip_target_dir")
 
-TIME_DURATION = 1800  # seconds
+TIME_DURATION = 600  # seconds
 
 EVAL_K_VALUES = [1, 3, 5, 10, 50, 100, 1000]
 
