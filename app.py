@@ -4,7 +4,6 @@ import logging
 import pandas as pd
 import gradio as gr
 import multiprocessing
-from apscheduler.schedulers.background import BackgroundScheduler
 
 from src.backend import pull_search_results
 from src.envs import (
@@ -87,9 +86,6 @@ if __name__ == "__main__":
         ),
     )
     process.start()
-    
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(restart_space, "interval", seconds=1800)
-    scheduler.start()
+
     demo.queue(default_concurrency_limit=40)
     demo.launch()
