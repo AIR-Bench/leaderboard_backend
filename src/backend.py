@@ -36,7 +36,7 @@ def compute_metrics(
     data_loader = DataLoader(benchmark_version, cache_dir=cache_dir)
     evaluator = Evaluator(data_loader)
     
-    eval_results = evaluator.evaluate_results(search_results_save_dir, k_values=k_values)
+    eval_results = evaluator.evaluate_results(search_results_save_dir, k_values=k_values, split='test')
     return eval_results
 
 
