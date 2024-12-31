@@ -302,6 +302,9 @@ def pull_search_results(
                 except AssertionError as e:
                     logger.error(f"AssertionError: {e}. Skip this commit: {commit_info['file_name']}")
                     continue
+                except NotADirectoryError as e:
+                    logger.error(f"NotADirectoryError: {e}. Skip this commit: {commit_info['file_name']}")
+                    continue
                 
                 save_dir = os.path.join(eval_results_dir, commit_info['model_name'], commit_info['reranker_name'])
                 os.makedirs(save_dir, exist_ok=True)
