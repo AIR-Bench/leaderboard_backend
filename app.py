@@ -13,7 +13,8 @@ from src.envs import (
     UNZIP_TARGET_DIR,
     TIME_DURATION,
     EVAL_K_VALUES,
-    SUBMIT_INFOS_TABLE_COLS
+    SUBMIT_INFOS_TABLE_COLS,
+    TIMEOUT,
 )
 from src.css_html_js import custom_css
 
@@ -36,7 +37,7 @@ def load_submit_infos_df():
         repo_id=SUBMIT_INFOS_REPO,
         repo_type="dataset",
         local_dir=SUBMIT_INFOS_DIR,
-        etag_timeout=30
+        etag_timeout=TIMEOUT,
     )
     submit_infos_save_path = os.path.join(SUBMIT_INFOS_DIR, SUBMIT_INFOS_FILE_NAME)
     

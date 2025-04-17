@@ -15,7 +15,8 @@ from src.envs import (
     API,
     ZIP_CACHE_DIR,
     SEARCH_RESULTS_REPO, RESULTS_REPO, SUBMIT_INFOS_REPO,
-    make_clickable_model
+    make_clickable_model,
+    TIMEOUT,
 )
 
 logger = logging.getLogger(__name__)
@@ -171,7 +172,7 @@ def pull_search_results(
         repo_id=SUBMIT_INFOS_REPO,
         repo_type="dataset",
         local_dir=submit_infos_dir,
-        etag_timeout=30
+        etag_timeout=TIMEOUT,
     )
     
     logger.warning(f"Start from commit: {start_commit_id}")
@@ -181,7 +182,7 @@ def pull_search_results(
             repo_type="dataset",
             revision=start_commit_id,
             local_dir=hf_search_results_repo_dir,
-            etag_timeout=30,
+            etag_timeout=TIMEOUT,
             allow_patterns=['*.json']
         )
         cur_file_paths = get_file_list(hf_search_results_repo_dir, allowed_suffixes=['.json'])
@@ -190,7 +191,7 @@ def pull_search_results(
             repo_id=SEARCH_RESULTS_REPO,
             repo_type="dataset",
             local_dir=hf_search_results_repo_dir,
-            etag_timeout=30,
+            etag_timeout=TIMEOUT,
             allow_patterns=['*.json']
         )
         cur_file_paths = get_file_list(hf_search_results_repo_dir, allowed_suffixes=['.json'])
@@ -204,13 +205,13 @@ def pull_search_results(
                 repo_id=RESULTS_REPO,
                 repo_type="dataset",
                 local_dir=hf_eval_results_repo_dir,
-                etag_timeout=30
+                etag_timeout=TIMEOUT
             )
             API.snapshot_download(
                 repo_id=SEARCH_RESULTS_REPO,
                 repo_type="dataset",
                 local_dir=hf_search_results_repo_dir,
-                etag_timeout=30,
+                etag_timeout=TIMEOUT,
                 allow_patterns=['*.json']
             )
         except Exception as e:
@@ -247,7 +248,7 @@ def pull_search_results(
                     repo_id=SEARCH_RESULTS_REPO,
                     repo_type="dataset",
                     local_dir=ZIP_CACHE_DIR,
-                    etag_timeout=30,
+                    etag_timeout=TIMEOUT,
                     allow_patterns=[f'*{zip_file_name}']
                 )
                 zip_file_path = get_zip_file_path(zip_file_name)
